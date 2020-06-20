@@ -1,2 +1,2 @@
 # shiv.github.io
-Calendar Slot Booling service Using HTML5,PHP,JAVASCRIPT,JS
+Calendar Slot Booking service Using HTML5,PHP,JAVASCRIPT,JS
