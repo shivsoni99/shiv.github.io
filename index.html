@@ -1,0 +1,241 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+ 
+ <meta charset="utf-8" />
+  
+
+ 
+ <style type="text/css">
+  
+  p, body, td { font-family:"Times New Roman","cursive","fantasy"; font-size: 14pt; }
+ 
+   body { padding: 0px; margin: 0px; background-color:#666699; }
+  
+  a { color: #white; }
+ 
+#buttonWeek:hover{
+font-size: 20.5px;
+color:yellow;
+ transition: all 1s ease;
+
+
+  }
+              
+#buttonMonth:hover{
+font-size: 20.5px;
+color:yellow;
+ transition: all 1s ease;
+
+
+  }
+#buttonDay:hover{
+font-size: 20.5px;
+color:yellow;
+ transition: all 1s ease;
+
+
+  }
+ p{
+    border: 1px solid;
+  padding: 10px;
+  box-shadow: 5px 6px 10px red;}
+
+  .space { margin: 10px 0px 10px 0px; }
+ 
+   .header { background: black; ; padding:20px 10px; color: white; box-shadow: 0px 0px 10px 5px rgba(0,0,0,0.75); }
+  
+  .header a { color: ff9966; }
+ 
+   .header h1 a { text-decoration: none; }
+    
+.header h1 { padding: 0px; margin: 0px; }
+  
+  .main { padding: 10px; margin-top: 10px; }
+  </style>
+
+  <style>
+   
+ .toolbar {
+      margin: 10px 0px;
+    }
+
+    .toolbar > .toolbar-item:not(:last-child) {
+      border-right: 1px solid #ccc;
+    }
+
+    .toolbar-item {
+      padding: 0px 10px;
+    }
+
+    .toolbar-item a {
+      text-decoration: none;
+      color:#FF6600;
+      display: inline-block;
+      margin-right: 5px;
+      font-size: 20px;
+  font-weight:5px  }
+    .selected-button {
+      border-bottom: 2px solid orange;
+    }
+ 
+ </style>
+    
+
+<script src="js/daypilot/daypilot-all.min.js"></script>
+
+ 
+ <!-- jQuery -->
+  <script src="js/jquery-1.9.1.min.js"></script>
+
+</head>
+<body>
+<div class="header">
+  
+ <div> <p align=center><U>SLOT BOOKING SERVICE</U></p></div>
+</div>
+
+<div class="main">
+ 
+ <div style="float:left; width: 220px;">
+ 
+
+   <div id="nav"></div>
+  </div>
+  <div style="margin-left: 220px;">
+   
+ <div class="toolbar buttons">
+      <span class="toolbar-item"><a id="buttonDay" href="#">Day</a></span>
+  
+    <span class="toolbar-item"><a id="buttonWeek" href="#">Week</a></span>
+   
+   <span class="toolbar-item"><a id="buttonMonth" href="#">Month</a></span>
+    </div>
+    
+<div id="dpDay"></div>
+    <div id="dpWeek"></div>
+   
+ <div id="dpMonth"></div>
+  </div>
+
+</div>
+
+<script type="text/javascript">
+
+
+  var nav = new DayPilot.Navigator("nav");
+  nav.showMonths = 3;
+  nav.skipMonths = 3;
+  nav.init();
+
+  var day = new DayPilot.Calendar("dpDay");
+
+  day.viewType = "Day";
+  addEventHandlers(day);
+  day.init();
+
+  var week = new DayPilot.Calendar("dpWeek");
+ 
+ week.viewType = "Week";
+  addEventHandlers(week);
+  week.init();
+
+  var month = new DayPilot.Month("dpMonth");
+
+  addEventHandlers(month);
+  month.init();
+
+ 
+ function addEventHandlers(dp) {
+    dp.onEventMoved = function (args) {
+      $.post("backend_move.php",
+        {
+          id: args.e.id(),
+          newStart: args.newStart.toString(),
+          newEnd: args.newEnd.toString()
+        },
+      
+  function() {
+          console.log("Moved.");
+        });
+    };
+
+   
+ dp.onEventResized = function (args) {
+      $.post("backend_resize.php",
+        {
+          id: args.e.id(),
+          newStart: args.newStart.toString(),
+          newEnd: args.newEnd.toString()
+        },
+        function() {
+          console.log("Resized.");
+        });
+    };
+
+    // event creating
+    dp.onTimeRangeSelected = function (args) {
+
+      DayPilot.Modal.prompt("New event name:", "Event").then(function(modal) {
+        dp.clearSelection();
+
+        if (!modal.result) {
+          return;
+        }
+
+        $.post("backend_create.php",
+          {
+            start: args.start.toString(),
+            end: args.end.toString(),
+            name: modal.result
+          },
+          function(data) {
+            var e = new DayPilot.Event({
+              start: args.start,
+              end: args.end,
+              id: data.id,
+              resource: args.resource,
+              text: modal.result
+            });
+            dp.events.add(e);
+          }
+        );
+
+     
+ });
+    };
+
+    dp.onEventClick = function(args) {
+
+    };
+  }
+
+ 
+ var switcher = new DayPilot.Switcher({
+    triggers: [
+      {id: "buttonDay", view: day },
+      {id: "buttonWeek", view: week},
+      {id: "buttonMonth", view: month}
+    ],
+    navigator: nav,
+    selectedClass: "selected-button",
+    onChanged: function(args) {
+      console.log("onChanged fired");
+      switcher.events.load("backend_events.php");
+    }
+  });
+
+  switcher.select("buttonDay");
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
