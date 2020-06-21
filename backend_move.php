@@ -14,8 +14,9 @@ $stmt->execute();
 class Result {}
 
 $response = new Result();
+
 $response->result = 'OK';
-$response->message = 'Update successful';
+$response->message = 'Update is successful';
 
 header('Content-Type: application/json');
 echo json_encode($response);
